@@ -1,17 +1,17 @@
-/*************************************************** 
+/***************************************************
   This is a library for the Si1145 UV/IR/Visible Light Sensor
 
   Designed specifically to work with the Si1145 sensor in the
   adafruit shop
   ----> https://www.adafruit.com/products/1777
 
-  These sensors use I2C to communicate, 2 pins are required to  
+  These sensors use I2C to communicate, 2 pins are required to
   interface
-  Adafruit invests time and resources providing this open source code, 
-  please support Adafruit and open-source hardware by purchasing 
+  Adafruit invests time and resources providing this open source code,
+  please support Adafruit and open-source hardware by purchasing
   products from Adafruit!
 
-  Written by Limor Fried/Ladyada for Adafruit Industries.  
+  Written by Limor Fried/Ladyada for Adafruit Industries.
   BSD license, all text above must be included in any redistribution
  ****************************************************/
 #ifndef _SI1145_H_
@@ -19,9 +19,9 @@
 
 
 #if (ARDUINO >= 100)
- #include "Arduino.h"
+#include "Arduino.h"
 #else
- #include "WProgram.h"
+#include "WProgram.h"
 #endif
 #include <Wire.h>
 
@@ -43,7 +43,6 @@
 #define SI1145_GET_CAL    0x12
 
 /* Parameters */
-#define SI1145_PARAM_I2CADDR 0x00
 #define SI1145_PARAM_CHLIST   0x01
 #define SI1145_PARAM_CHLIST_ENUV 0x80
 #define SI1145_PARAM_CHLIST_ENAUX 0x40
@@ -93,6 +92,11 @@
 
 #define SI1145_PARAM_ADCMUX_SMALLIR  0x00
 #define SI1145_PARAM_ADCMUX_LARGEIR  0x03
+
+#define SI1145_REG_CHIPSTAT_RUNNING  0x04
+#define SI1145_REG_CHIPSTAT_SUSPEND  0x02
+#define SI1145_REG_CHIPSTAT_SLEEP    0x01
+
 
 
 
@@ -149,43 +153,67 @@
 #define SI1145_ADDR 0x60
 
 class Adafruit_SI1145  {
- public:
-  enum Gain {
-   ADC_0 = 0,
-   ADC_1,
-   ADC_2,
-   ADC_3,
-   ADC_4,
-   ADC_5,
-   ADC_6,
-   ADC_7
-  };
-  Adafruit_SI1145(void);
-  boolean begin();
-  void reset();
+  public:
+    enum Gain {
+      ADC_0 = 0,
+      ADC_1,
+      ADC_2,
+      ADC_3,
+      ADC_4,
+      ADC_5,
+      ADC_6,
+      ADC_7
+    };
+    enum Sensor_Mode {
+      MODE_SLEEP,
+      MODE_FORCED,
+      MODE_AUTO
+    };
+    enum Sensor_Enable {
+      SENSOR_UV,
+      SENSOR_AUX,
+      SENSOR_IR,
+      SENSOR_VIS,
+      SENSOR_P1,
+      SENSOR_P2,
+      SENSOR_P3
+    };
 
-  Gain readVisibleGain();
-  void setVisibleGain(Gain gain);
+    Adafruit_SI1145(uint8_t address = SI1145_ADDR);
+    bool begin();
+    void reset();
 
-  Gain readIRGain();
-  void setIRGain(Gain gain);
+    // Seteps: Enable Sensors -> Set Rate -> Set Mode
+    void enableSensor(Sensor_Enable sensor);
+    void setMode(Sensor_Mode mode = MODE_AUTO );
+    void setMeasureRate(uint16_t rate);  // rate * 31.25 us = measure rate in us
+    void enableInerupt(bool ALS = true);
 
-  float calculateLux(uint16_t vis, uint16_t ir);
+    Gain readVisibleGain();
+    void setVisibleGain(Gain gain);
 
-  uint16_t readUV();
-  uint16_t readIR();
-  uint16_t readVisible();
-  uint16_t readProx();
+    Gain readIRGain();
+    void setIRGain(Gain gain);
 
- private:
-  uint16_t read16(uint8_t addr);
-  uint8_t read8(uint8_t addr);
-  void write8(uint8_t reg, uint8_t val);
-  uint8_t readParam(uint8_t p);
-  uint8_t writeParam(uint8_t p, uint8_t v);
+    float calculateLux(uint16_t vis, uint16_t ir);
 
-  uint8_t _addr;
-  uint16_t _vis_dark;
-  uint16_t _ir_dark;
+    void takeForcedMeasurement();
+
+    uint16_t readUV();
+    uint16_t readIR();
+    uint16_t readVisible();
+    uint16_t readProx();
+
+  private:
+    uint16_t read16(uint8_t addr);
+    uint8_t read8(uint8_t addr);
+    void write8(uint8_t reg, uint8_t val);
+    uint8_t readParam(uint8_t p);
+    uint8_t writeParam(uint8_t p, uint8_t v);
+
+    uint8_t _addr;
+    uint16_t _vis_dark;
+    uint16_t _ir_dark;
+    bool proximityEnabled;
 };
 #endif
