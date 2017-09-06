@@ -203,6 +203,9 @@ class Adafruit_SI1145  {
     uint16_t readIR();
     uint16_t readVisible();
     uint16_t readProx();
+	
+	void setVisiableOffset(int16_t val);
+	void setIROffset(int16_t val);
 
   private:
     uint16_t read16(uint8_t addr);

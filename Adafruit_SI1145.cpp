@@ -19,8 +19,8 @@
 
 Adafruit_SI1145::Adafruit_SI1145(uint8_t address) {
   _addr = address;
-  _vis_dark = 256; // as per Si114x manual - previously ADC_OFFSET but now fixed at 256
-  _ir_dark = 256;
+  setVisiableOffset(0);
+  setIROffset(0);  
 }
 
 
@@ -131,12 +131,12 @@ void Adafruit_SI1145::setMode(Sensor_Mode mode) {
     case MODE_FORCED:
       if (!proximityEnabled){
         setMeasureRate(0);
-		write8(SI1145_REG_COMMAND, SI1145_ALS_FORCE);
-	  }
+        write8(SI1145_REG_COMMAND, SI1145_ALS_FORCE);
+      }
       else{
         setMeasureRate(0);
-		write8(SI1145_REG_COMMAND, SI1145_PSALS_FORCE);
-	  }
+        rite8(SI1145_REG_COMMAND, SI1145_PSALS_FORCE);
+      }
       break;
     case MODE_AUTO:
       if (!proximityEnabled)
@@ -231,6 +231,16 @@ uint16_t Adafruit_SI1145::readIR(void) {
 // returns "Proximity" - assumes an IR LED is attached to LED
 uint16_t Adafruit_SI1145::readProx(void) {
   return read16(SI1145_REG_PS1DATA0);
+}
+
+// set visiable offset
+void Adafruit_SI1145::setVisiableOffset(int16_t val){
+  vis_dark = val + 256; // as per Si114x manual - previously ADC_OFFSET but now fixed at 256
+}
+
+// set ir offset
+void Adafruit_SI1145::setIROffset(int16_t val){
+  _ir_dark = val + 256; // as per Si114x manual - previously ADC_OFFSET but now fixed at 256
 }
 
 /*********************************************************************/
