@@ -206,6 +206,7 @@ class Adafruit_SI1145  {
 	
 	void setVisiableOffset(int16_t val);
 	void setIROffset(int16_t val);
+	void setUVOffset(int16_t val);
 
   private:
     uint16_t read16(uint8_t addr);
@@ -217,6 +218,7 @@ class Adafruit_SI1145  {
     uint8_t _addr;
     uint16_t _vis_dark;
     uint16_t _ir_dark;
+	uint16_t _uv_dark;
     bool proximityEnabled;
 };
 #endif

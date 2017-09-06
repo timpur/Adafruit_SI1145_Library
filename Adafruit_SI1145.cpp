@@ -135,7 +135,7 @@ void Adafruit_SI1145::setMode(Sensor_Mode mode) {
       }
       else{
         setMeasureRate(0);
-        rite8(SI1145_REG_COMMAND, SI1145_PSALS_FORCE);
+        write8(SI1145_REG_COMMAND, SI1145_PSALS_FORCE);
       }
       break;
     case MODE_AUTO:
@@ -200,7 +200,11 @@ void Adafruit_SI1145::takeForcedMeasurement() {
 
 // returns the UV index * 100 (divide by 100 to get the index)
 uint16_t Adafruit_SI1145::readUV(void) {
-  return read16(0x2C);
+  uint16_t uv = read16(SI1145_REG_UVINDEX0);
+  if (uv < _uv_dark)
+    _uv_dark = uv;
+  uv -= _uv_dark;
+  return uv;
 }
 
 // returns a calculated lux value as per SI144x AN523.6.
@@ -235,12 +239,17 @@ uint16_t Adafruit_SI1145::readProx(void) {
 
 // set visiable offset
 void Adafruit_SI1145::setVisiableOffset(int16_t val){
-  vis_dark = val + 256; // as per Si114x manual - previously ADC_OFFSET but now fixed at 256
+  _vis_dark = val + 256; // as per Si114x manual - previously ADC_OFFSET but now fixed at 256
 }
 
 // set ir offset
 void Adafruit_SI1145::setIROffset(int16_t val){
   _ir_dark = val + 256; // as per Si114x manual - previously ADC_OFFSET but now fixed at 256
+}
+
+// set uv offset
+void Adafruit_SI1145::setUVOffset(int16_t val){
+  _uv_dark = val;
 }
 
 /*********************************************************************/
